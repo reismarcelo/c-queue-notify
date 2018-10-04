@@ -1,0 +1,10 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0" servicepoint="c-queue-notify-servicepoint">
+    <kickers xmlns="http://tail-f.com/ns/kicker">
+        <data-kicker>
+            <id>{id}</id>
+            <monitor>{service-path}/plan/commit-queue</monitor>
+            <kick-node>/ncs:services/cq-notify:c-queue-notify[cq-notify:id={id}]</kick-node>
+            <action-name>notify</action-name>
+        </data-kicker>
+    </kickers>
+</config-template>

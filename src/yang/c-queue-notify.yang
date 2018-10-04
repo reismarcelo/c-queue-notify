@@ -1,0 +1,107 @@
+module c-queue-notify {
+
+  namespace "http://cisco.com/services/cqueuenotify";
+  prefix cq-notify;
+
+  import ietf-inet-types { prefix inet; }
+  import tailf-common { prefix tailf; }
+  import tailf-ncs { prefix ncs; }
+  import ietf-netconf-acm { prefix nacm; }
+  import tailf-kicker { prefix kicker; }
+
+  organization "Cisco Systems, Inc.";
+
+  contact
+    " Marcelo Reis
+      mareis@cisco.com
+    ";
+
+  description
+    " Sample service to demonstrate commit queue completion notification.
+    ";
+
+
+  // =========================================================================
+  //  REVISION
+  // =========================================================================
+
+  revision 2018-10-04 {
+    description
+      "Initial version.";
+  }
+
+
+  // =========================================================================
+  //  SERVICES
+  // =========================================================================
+
+  augment /ncs:services {
+    list c-queue-notify {
+      tailf:info "Monitor a service and provide REST notification on completion of associated commit-queue items";
+
+      key id;
+      leaf id {
+        tailf:info "Unique name used to identify the service monitor instance";
+        tailf:cli-allow-range;
+        type string {
+          tailf:info "<string>;;Monitor (kicker) id";
+        }
+      }
+
+      uses ncs:service-data;
+      ncs:servicepoint c-queue-notify-servicepoint;
+
+      leaf service-path {
+        tailf:info "CDB path of the service being monitored";
+        type nacm:node-instance-identifier {
+          tailf:info "<string>;;Xpath leading to the root of the service";
+        }
+        mandatory true;
+      }
+
+      tailf:action notify {
+        tailf:actionpoint c-queue-notify-action;
+        input {
+          uses kicker:action-input-params;
+        }
+        output {
+        }
+      }
+
+      container rest {
+        tailf:info "REST notification settings.";
+        tailf:cli-add-mode;
+
+        leaf uri {
+          tailf:info "REST URI.";
+          type string {
+            tailf:info "<string>;;URI";
+          }
+        }
+
+        leaf payload {
+          tailf:info "REST payload data (in XML), sent with the notification.";
+          type string {
+            tailf:info "<string>;;XML payload";
+          }
+        }
+
+        leaf username {
+          tailf:info "REST username";
+          type string {
+            tailf:info "<string>;;username";
+          }
+        }
+
+        leaf password {
+          tailf:info "REST password";
+          tailf:suppress-echo "true";
+          type tailf:aes-cfb-128-encrypted-string {
+            tailf:info "<string>;;password";
+          }
+        }
+      }  // container rest
+    }  // list c-queue-notify
+
+  }  // augment
+}
